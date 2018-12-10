@@ -33,6 +33,7 @@ public abstract class Block {
 		colorMap.put(512, new Color(229,190,53));
 		colorMap.put(1024, new Color(237,197,63));
 		colorMap.put(2048, new Color(237,194,46));
+		colorMap.put(3, new Color(242,145,255)); //Wildcard
 	}
 	
 	public Block(int x,int y, int value) {
@@ -76,6 +77,22 @@ public abstract class Block {
 	public void setCY(double cy) {
 		this.cy = cy;
 	}
+	
+	public int getOX() {
+		return ox;
+	}
+
+	public void setOX(int ox) {
+		this.ox = ox;
+	}
+
+	public int getOY() {
+		return oy;
+	}
+
+	public void setOY(int oy) {
+		this.oy = oy;
+	}
 
 	public int getValue() {
 		return value;
@@ -101,6 +118,10 @@ public abstract class Block {
 		return this.isToBeDestroyed;
 	}
 	
+	public double getScalingFactor() {
+		return scalingFactor;
+	}
+	
 	
 	public void draw(Graphics g) {
 		g.setColor(Block.colorMap.get(this.value));
@@ -109,24 +130,31 @@ public abstract class Block {
         g.fillRect((int)(this.cx*(double)(GameBoard.COURT_WIDTH-10)/4+10+(width*(1/scalingFactor)-width)/2), (int)(this.cy*(double)(GameBoard.COURT_HEIGHT-10)/4+10+(height*(1/scalingFactor)-height)/2), width, height);
         g.setColor(Color.BLACK);
         
+        String s;
+    	if (value == 3) {
+    		s = "W";
+    	}else {
+    		s = String.valueOf(this.value);
+    	}
+        
         Font font  = new Font(Font.SANS_SERIF, Font.BOLD, 40);
         g.setFont(font);
         
         FontRenderContext frc = new FontRenderContext(null, true, true);
 
-        Rectangle2D r2D = font.getStringBounds(String.valueOf(this.value), frc);
+        Rectangle2D r2D = font.getStringBounds(s, frc);
         int rWidth = (int) Math.round(r2D.getWidth());
         int rHeight = (int) Math.round(r2D.getHeight());
         
         if (scalingFactor == 1) {
-        	g.drawString(String.valueOf(this.value), (int)(this.getCX()*(double)(GameBoard.COURT_WIDTH-10)/4+10+(GameBoard.COURT_WIDTH-50)/8-rWidth/2), (int)(this.getCY()*(double)(GameBoard.COURT_HEIGHT-10)/4+10+(GameBoard.COURT_HEIGHT-50)/8+rHeight/4));
+        	g.drawString(s, (int)(this.getCX()*(double)(GameBoard.COURT_WIDTH-10)/4+10+(GameBoard.COURT_WIDTH-50)/8-rWidth/2), (int)(this.getCY()*(double)(GameBoard.COURT_HEIGHT-10)/4+10+(GameBoard.COURT_HEIGHT-50)/8+rHeight/4));
         }
         
-        if (Math.abs(cx-x) > 0.1 || Math.abs(cy-y) > 0.1) {
+        if (Math.abs(cx-x) > 0.01 || Math.abs(cy-y) > 0.01) {
         	cx+=(double)(x-ox)/FRAMES_TO_ANIMATE;
         	cy+=(double)(y-oy)/FRAMES_TO_ANIMATE;
         	GameBoard.boardSingleton.isAnimating = true;
-        }else {
+        }else {//If no blocks have moved, isAnimating never turns on, so next block doesn't appear
         	ox = x;
         	cx = x;
         	oy = y;
@@ -155,12 +183,30 @@ public abstract class Block {
 	
 	public void combineLeft(ArrayList<Block> blocks) {
 		for (Block block:blocks) {
-			if (block.getX() == this.x-1 && block.getY() == this.y && block.getValue() == this.value && !block.isNew && !block.isToBeDestroyed) {
+			if (block.getX() == this.x-1 && block.getY() == this.y && (block.getValue() == this.value || isWildcard(this) || isWildcard(block)) && !block.isNew && !block.isToBeDestroyed && block != this) {
 				this.x-=1;
-				this.value*=2;
-				block.setToBeDestroyed(true);
-				this.isNew = true;
-				GameBoard.boardSingleton.score+=this.value;
+				if (!isWildcard(this) && !isWildcard(block)) {
+					this.value*=2;
+					block.setToBeDestroyed(true);
+					this.isNew = true;
+					GameBoard.boardSingleton.score+=this.value;
+				}
+				else if (isWildcard(this) && isWildcard(block)) {
+					block.setToBeDestroyed(true);
+					this.setToBeDestroyed(true);
+				}
+				else if (isWildcard(this)) {
+					this.value = block.getValue()*2;
+					block.setToBeDestroyed(true);
+					this.isNew = true;
+					GameBoard.boardSingleton.score+=this.value;
+				}
+				else if (isWildcard(block)) {
+					this.value*=2;
+					block.setToBeDestroyed(true);
+					this.isNew = true;
+					GameBoard.boardSingleton.score+=this.value;
+				}
 				break;
 			}
 		}
@@ -181,12 +227,30 @@ public abstract class Block {
 	
 	public void combineRight(ArrayList<Block> blocks) {
 		for (Block block:blocks) {
-			if (block.getX() == this.x+1 && block.getY() == this.y && block.getValue() == this.value && !block.isNew && !block.isToBeDestroyed) {
+			if (block.getX() == this.x+1 && block.getY() == this.y && (block.getValue() == this.value || isWildcard(this) || isWildcard(block)) && !block.isNew && !block.isToBeDestroyed && block != this) {
 				this.x+=1;
-				this.value*=2;
-				block.setToBeDestroyed(true);
-				this.isNew = true;
-				GameBoard.boardSingleton.score+=this.value;
+				if (!isWildcard(this) && !isWildcard(block)) {
+					this.value*=2;
+					block.setToBeDestroyed(true);
+					this.isNew = true;
+					GameBoard.boardSingleton.score+=this.value;
+				}
+				else if (isWildcard(this) && isWildcard(block)) {
+					block.setToBeDestroyed(true);
+					this.setToBeDestroyed(true);
+				}
+				else if (isWildcard(this)) {
+					this.value = block.getValue()*2;
+					block.setToBeDestroyed(true);
+					this.isNew = true;
+					GameBoard.boardSingleton.score+=this.value;
+				}
+				else if (isWildcard(block)) {
+					this.value*=2;
+					block.setToBeDestroyed(true);
+					this.isNew = true;
+					GameBoard.boardSingleton.score+=this.value;
+				}
 				break;
 			}
 		}
@@ -206,12 +270,30 @@ public abstract class Block {
 	
 	public void combineUp(ArrayList<Block> blocks) {
 		for (Block block:blocks) {
-			if (block.getY() == this.y-1 && block.getX() == this.x && block.getValue() == this.value && !block.isNew && !block.isToBeDestroyed) {
+			if (block.getY() == this.y-1 && block.getX() == this.x && (block.getValue() == this.value || isWildcard(this) || isWildcard(block)) && !block.isNew && !block.isToBeDestroyed && block != this) {
 				this.y-=1;
-				this.value*=2;
-				block.setToBeDestroyed(true);
-				this.isNew = true;
-				GameBoard.boardSingleton.score+=this.value;
+				if (!isWildcard(this) && !isWildcard(block)) {
+					this.value*=2;
+					block.setToBeDestroyed(true);
+					this.isNew = true;
+					GameBoard.boardSingleton.score+=this.value;
+				}
+				else if (isWildcard(this) && isWildcard(block)) {
+					block.setToBeDestroyed(true);
+					this.setToBeDestroyed(true);
+				}
+				else if (isWildcard(this)) {
+					this.value = block.getValue()*2;
+					block.setToBeDestroyed(true);
+					this.isNew = true;
+					GameBoard.boardSingleton.score+=this.value;
+				}
+				else if (isWildcard(block)) {
+					this.value*=2;
+					block.setToBeDestroyed(true);
+					this.isNew = true;
+					GameBoard.boardSingleton.score+=this.value;
+				}
 				break;
 			}
 		}
@@ -231,15 +313,37 @@ public abstract class Block {
 	
 	public void combineDown(ArrayList<Block> blocks) {
 		for (Block block:blocks) {
-			if (block.getY() == this.y+1 && block.getX() == this.x && block.getValue() == this.value && !block.isNew && !block.isToBeDestroyed) {
+			if (block.getY() == this.y+1 && block.getX() == this.x && (block.getValue() == this.value || isWildcard(this) || isWildcard(block)) && !block.isNew && !block.isToBeDestroyed && block != this) {
 				this.y+=1;
-				this.value*=2;
-				block.setToBeDestroyed(true);
-				this.isNew = true;
-				GameBoard.boardSingleton.score+=this.value;
+				if (!isWildcard(this) && !isWildcard(block)) {
+					this.value*=2;
+					block.setToBeDestroyed(true);
+					this.isNew = true;
+					GameBoard.boardSingleton.score+=this.value;
+				}
+				else if (isWildcard(this) && isWildcard(block)) {
+					block.setToBeDestroyed(true);
+					this.setToBeDestroyed(true);
+				}
+				else if (isWildcard(this)) {
+					this.value = block.getValue()*2;
+					block.setToBeDestroyed(true);
+					this.isNew = true;
+					GameBoard.boardSingleton.score+=this.value;
+				}
+				else if (isWildcard(block)) {
+					this.value*=2;
+					block.setToBeDestroyed(true);
+					this.isNew = true;
+					GameBoard.boardSingleton.score+=this.value;
+				}
 				break;
 			}
 		}
+	}
+	
+	public boolean isWildcard(Block block) {
+		return block.getValue() == 3;
 	}
 	
 	

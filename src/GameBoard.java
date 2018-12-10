@@ -6,7 +6,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-import java.util.*;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -97,10 +96,19 @@ public class GameBoard extends JPanel {
 	    	}
     	}while(!isValid);
     	
-    	if (Math.random()>0.8) value = 4; else value = 2;
+    	double blockDecider = Math.random();
     	
+    	if (blockDecider<0.1) value = 4;
+    	else if (blockDecider<0.7) value = 2;
+    	else value = 3;
     	
-	    Block b = new RegularBlock(x,y,value);
+    	Block b;
+    	if (value == 3) {
+    		b = new WildCardBlock(x,y);
+    	}else {
+    		b = new RegularBlock(x,y,value);
+    	}
+	    
 	    blocks.add(b);
     	
     }
@@ -142,25 +150,27 @@ public class GameBoard extends JPanel {
         g.fillRect(0,(COURT_HEIGHT-10)*3/4, COURT_WIDTH,10);
         g.fillRect(0,COURT_HEIGHT-10, COURT_WIDTH,10);
         
+        boolean doneAnimating = true;
         for (Block block:toBeDestroyedBlocks) {
         	block.draw(g);
+        	if (block.getCX() != block.getX() || block.getCY() != block.getY()) {
+        		doneAnimating = false;
+	        }
         }
         
-        boolean doneAnimating = true;
         for (Block block:blocks) {
         	block.draw(g);
         	if (block.getCX() != block.getX() || block.getCY() != block.getY()) {
         		doneAnimating = false;
-        	}
+	        }
         }
         
-        if (doneAnimating && isAnimating) {
-        	generateBlock();
+        if (doneAnimating && isAnimating || blocks.size() == 0) {
         	updateScore();
         	isAnimating = false;
         	toBeDestroyedBlocks.clear();
+        	generateBlock();
         }
-        
     }
     
     public void moveLeft() {
@@ -204,17 +214,28 @@ public class GameBoard extends JPanel {
     }
     
     public void removeNullBlocks() {
-    	try {
-	    	for (Block block:blocks) {
-	    		if (block.getToBeDestroyed()) {
-	    			Block destroyedBlock = new RegularBlock(block.getX(),block.getY(),block.getValue());
-	    			toBeDestroyedBlocks.add(destroyedBlock);
-	    			blocks.remove(block);
-	    		}
-	    	}
-    	}catch (ConcurrentModificationException e) {
-    		removeNullBlocks();
+    	
+		ArrayList<Block> newBlocks = new ArrayList<Block>();
+    	for (Block block:blocks) {
+    		if (block.getToBeDestroyed()) {
+    			Block destroyedBlock;
+    			if (block.getValue() == 3) {
+    				destroyedBlock = new WildCardBlock(block.getX(),block.getY());
+    			}else {
+    				destroyedBlock = new RegularBlock(block.getX(),block.getY(),block.getValue());
+    			}
+    			destroyedBlock.setCX(block.getCX());
+				destroyedBlock.setCY(block.getCY());
+				destroyedBlock.setOX(block.getOX());
+				destroyedBlock.setOY(block.getOY());
+    			if (!toBeDestroyedBlocks.contains(destroyedBlock))
+    			toBeDestroyedBlocks.add(destroyedBlock);
+    		}else {
+    			
+    			newBlocks.add(block);
+    		}
     	}
+    	blocks = newBlocks;
     	
     }
     
