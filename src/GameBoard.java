@@ -67,6 +67,7 @@ public class GameBoard extends JPanel {
 	                } else if (e.getKeyCode() == KeyEvent.VK_UP) {
 	                    moveUp(); 
 	                }
+	            	postMovementSpecials();
 	            	removeNullBlocks();
             	}
             }
@@ -99,13 +100,17 @@ public class GameBoard extends JPanel {
     	double blockDecider = Math.random();
     	
     	if (blockDecider<0.1) value = 4;
-    	else if (blockDecider<0.7) value = 2;
-    	else value = 3;
+    	else if (blockDecider<0.8) value = 2;
+    	else if (blockDecider<0.85) value = 3;
+    	else value = 5;
     	
     	Block b;
     	if (value == 3) {
     		b = new WildCardBlock(x,y);
-    	}else {
+    	}else if (value == 5) {
+    		b = new BombBlock(x,y);
+    	}
+    	else {
     		b = new RegularBlock(x,y,value);
     	}
 	    
@@ -213,6 +218,12 @@ public class GameBoard extends JPanel {
     	}
     }
     
+    public void postMovementSpecials() {
+    	for (Block block:blocks) {
+    		block.special(blocks);
+    	}
+    }
+    
     public void removeNullBlocks() {
     	
 		ArrayList<Block> newBlocks = new ArrayList<Block>();
@@ -221,7 +232,10 @@ public class GameBoard extends JPanel {
     			Block destroyedBlock;
     			if (block.getValue() == 3) {
     				destroyedBlock = new WildCardBlock(block.getX(),block.getY());
-    			}else {
+    			}else if (block.getValue() == 5) {
+    				destroyedBlock = new BombBlock(block.getX(),block.getY());
+    			}
+    			else {
     				destroyedBlock = new RegularBlock(block.getX(),block.getY(),block.getValue());
     			}
     			destroyedBlock.setCX(block.getCX());

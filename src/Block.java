@@ -38,6 +38,14 @@ public abstract class Block {
 		colorMap.put(7, new Color(153,243,255)); //IceBlock
 	}
 	
+	public static Color getColorMap(Integer i) {
+		return colorMap.get(i);
+	}
+	
+	public double getFramesToAnimate() {
+		return FRAMES_TO_ANIMATE;
+	}
+	
 	public Block(int x,int y, int value) {
 		this.setX(x);
 		this.setY(y);
@@ -124,6 +132,10 @@ public abstract class Block {
 		return scalingFactor;
 	}
 	
+	public void setScalingFactor(double s) {
+		this.scalingFactor = s;
+	}
+	
 	
 	public void draw(Graphics g) {
 		g.setColor(Block.colorMap.get(this.value));
@@ -186,7 +198,7 @@ public abstract class Block {
 		for (Block block:blocks) {
 			if (block.getX() == this.x-1 && block.getY() == this.y && (block.getValue() == this.value || isWildcard(this) || isWildcard(block)) && !block.isNew && !block.isToBeDestroyed) {
 				this.x-=1;
-				if (!isWildcard(this) && !isWildcard(block)) {
+				if (!isWildcard(this) && !isWildcard(block) && block.getValue() != 5) {
 					this.value*=2;
 					block.setToBeDestroyed(true);
 					this.isNew = true;
@@ -196,13 +208,13 @@ public abstract class Block {
 					block.setToBeDestroyed(true);
 					this.setToBeDestroyed(true);
 				}
-				else if (isWildcard(this)) {
+				else if (isWildcard(this) && block.getValue() != 5) {
 					this.value = block.getValue()*2;
 					block.setToBeDestroyed(true);
 					this.isNew = true;
 					GameBoard.boardSingleton.score+=this.value;
 				}
-				else if (isWildcard(block)) {
+				else if (isWildcard(block) && block.getValue() != 5) {
 					this.value*=2;
 					block.setToBeDestroyed(true);
 					this.isNew = true;
@@ -228,7 +240,7 @@ public abstract class Block {
 		for (Block block:blocks) {
 			if (block.getX() == this.x+1 && block.getY() == this.y && (block.getValue() == this.value || isWildcard(this) || isWildcard(block)) && !block.isNew && !block.isToBeDestroyed) {
 				this.x+=1;
-				if (!isWildcard(this) && !isWildcard(block)) {
+				if (!isWildcard(this) && !isWildcard(block) && block.getValue() != 5) {
 					this.value*=2;
 					block.setToBeDestroyed(true);
 					this.isNew = true;
@@ -238,13 +250,13 @@ public abstract class Block {
 					block.setToBeDestroyed(true);
 					this.setToBeDestroyed(true);
 				}
-				else if (isWildcard(this)) {
+				else if (isWildcard(this) && block.getValue() != 5) {
 					this.value = block.getValue()*2;
 					block.setToBeDestroyed(true);
 					this.isNew = true;
 					GameBoard.boardSingleton.score+=this.value;
 				}
-				else if (isWildcard(block)) {
+				else if (isWildcard(block) && block.getValue() != 5) {
 					this.value*=2;
 					block.setToBeDestroyed(true);
 					this.isNew = true;
@@ -270,7 +282,7 @@ public abstract class Block {
 		for (Block block:blocks) {
 			if (block.getY() == this.y-1 && block.getX() == this.x && (block.getValue() == this.value || isWildcard(this) || isWildcard(block)) && !block.isNew && !block.isToBeDestroyed) {
 				this.y-=1;
-				if (!isWildcard(this) && !isWildcard(block)) {
+				if (!isWildcard(this) && !isWildcard(block) && block.getValue() != 5) {
 					this.value*=2;
 					block.setToBeDestroyed(true);
 					this.isNew = true;
@@ -280,13 +292,13 @@ public abstract class Block {
 					block.setToBeDestroyed(true);
 					this.setToBeDestroyed(true);
 				}
-				else if (isWildcard(this)) {
+				else if (isWildcard(this) && block.getValue() != 5) {
 					this.value = block.getValue()*2;
 					block.setToBeDestroyed(true);
 					this.isNew = true;
 					GameBoard.boardSingleton.score+=this.value;
 				}
-				else if (isWildcard(block)) {
+				else if (isWildcard(block) && block.getValue() != 5) {
 					this.value*=2;
 					block.setToBeDestroyed(true);
 					this.isNew = true;
@@ -312,7 +324,7 @@ public abstract class Block {
 		for (Block block:blocks) {
 			if (block.getY() == this.y+1 && block.getX() == this.x && (block.getValue() == this.value || isWildcard(this) || isWildcard(block)) && !block.isNew && !block.isToBeDestroyed) {
 				this.y+=1;
-				if (!isWildcard(this) && !isWildcard(block)) {
+				if (!isWildcard(this) && !isWildcard(block) && block.getValue() != 5) {
 					this.value*=2;
 					block.setToBeDestroyed(true);
 					this.isNew = true;
@@ -322,13 +334,13 @@ public abstract class Block {
 					block.setToBeDestroyed(true);
 					this.setToBeDestroyed(true);
 				}
-				else if (isWildcard(this)) {
+				else if (isWildcard(this) && block.getValue() != 5) {
 					this.value = block.getValue()*2;
 					block.setToBeDestroyed(true);
 					this.isNew = true;
 					GameBoard.boardSingleton.score+=this.value;
 				}
-				else if (isWildcard(block)) {
+				else if (isWildcard(block) && block.getValue() != 5) {
 					this.value*=2;
 					block.setToBeDestroyed(true);
 					this.isNew = true;
@@ -341,6 +353,10 @@ public abstract class Block {
 	
 	public boolean isWildcard(Block block) {
 		return block.getValue() == 3;
+	}
+	
+	public void special(ArrayList<Block> blocks) {
+		
 	}
 	
 	
