@@ -6,7 +6,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 public class Game implements Runnable {
-		
+			
 	public void run() {
 		// Top-level frame in which game components live
         // Be sure to change "TOP LEVEL FRAME" to the name of your game
@@ -14,13 +14,13 @@ public class Game implements Runnable {
         frame.setLocation(400, 400);
 
         // Status panel
-        final JPanel status_panel = new JPanel();
+        JPanel status_panel = new JPanel();
         frame.add(status_panel, BorderLayout.SOUTH);
-        final JLabel status = new JLabel("Score: 0");
+        JLabel status = new JLabel("Score: 0");
         status_panel.add(status);
 
         // Main playing area
-        final GameBoard board = new GameBoard(status);
+        final GameBoard board = new GameBoard(status,status_panel);
         frame.add(board, BorderLayout.CENTER);
         
      // Put the frame on the screen

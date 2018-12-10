@@ -1,4 +1,4 @@
-import java.awt.Color;
+
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -9,7 +9,7 @@ import javax.imageio.ImageIO;
 
 public class WildCardBlock extends Block{
 	private static BufferedImage img;
-	public static final String IMG_FILE = "wildcard.png";
+	private static final String IMG_FILE = "wildcard.png";
 	
 	public WildCardBlock(int x, int y) {
 		super(x, y, 3);

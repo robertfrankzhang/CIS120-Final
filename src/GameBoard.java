@@ -8,6 +8,7 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -28,12 +29,17 @@ public class GameBoard extends JPanel {
     public int score = 0;
     
     private JLabel status; // Current status text, i.e. "Running..."
+    private JPanel statusPanel;
+    private JButton replay;
+    private boolean firstIteration = true;
     
     private ArrayList<Block> blocks = new ArrayList<Block>();
     
     private ArrayList<Block> toBeDestroyedBlocks = new ArrayList<Block>();
+    
+    private boolean isGameOver = false;
 
-    public GameBoard(JLabel status) {
+    public GameBoard(JLabel status, JPanel status_panel) {
         // creates border around the court area, JComponent method
         setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
@@ -57,7 +63,7 @@ public class GameBoard extends JPanel {
         // square.)
         addKeyListener(new KeyAdapter() {
             public void keyReleased(KeyEvent e) {
-            	if (!isAnimating && (e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP)) {
+            	if (!isAnimating && !isGameOver && (e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP)) {
 	            	if (e.getKeyCode() == KeyEvent.VK_LEFT) {
 	                    moveLeft();
 	                } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
@@ -74,9 +80,7 @@ public class GameBoard extends JPanel {
         });
 
         this.status = status;
-        for (int i = 0; i<4; i++) {
-        	generateBlock();
-        }
+        this.statusPanel = status_panel;
         
         GameBoard.boardSingleton = this;
     }
@@ -127,9 +131,25 @@ public class GameBoard extends JPanel {
     public void reset() {
         
         status.setText("Score: 0");
+        statusPanel.add(status);
+        if (replay != null) {
+        	System.out.println("removed");
+        	statusPanel.remove(replay);
+        }
+        isGameOver = false;
+        isAnimating = false;
+        score = 0;
+        firstIteration = true;
+        blocks = new ArrayList<Block>();
+        for (int i = 0; i<4; i++) {
+        	generateBlock();
+        }
+        toBeDestroyedBlocks = new ArrayList<Block>();
 
         // Make sure that this component has the keyboard focus
         requestFocusInWindow();
+        statusPanel.revalidate();
+        statusPanel.repaint();
     }
 
     /**
@@ -178,10 +198,36 @@ public class GameBoard extends JPanel {
         	isAnimating = false;
         	toBeDestroyedBlocks.clear();
         	generateBlock();
+        	
+        	boolean isWin = checkWin();
+        	boolean isLose = checkLose();
+        	if (isWin) {
+        		status.setText("You win with a score of "+String.valueOf(score)+"!");
+        	}else if (isLose) {
+        		status.setText("You lose with a score of "+String.valueOf(score));
+        	}
+        	isGameOver = isWin || isLose;
+        }
+        
+        if (isGameOver) {
+        	g.setColor(new Color(0,0,0,200));
+            g.fillRect(0, 0, COURT_WIDTH, COURT_HEIGHT);
+            if (firstIteration) {
+	            statusPanel.remove(status);
+	            replay = new JButton("Replay");
+	            replay.addActionListener(new ActionListener() {
+	                public void actionPerformed(ActionEvent e) {
+	                    reset();
+	                }
+	            });
+	            System.out.println("added");
+	            statusPanel.add(replay);
+	            firstIteration = false;
+            }
         }
     }
     
-    public void moveLeft() {
+    private void moveLeft() {
     	for (int i = 0; i<4; i++) {
 	    	for (Block block:blocks) {
 	    		if (block.getX() == i) {
@@ -191,7 +237,7 @@ public class GameBoard extends JPanel {
     	}
     }
     
-    public void moveRight() {
+    private void moveRight() {
     	for (int i = 3; i>=0; i--) {
 	    	for (Block block:blocks) {
 	    		if (block.getX() == i) {
@@ -201,7 +247,7 @@ public class GameBoard extends JPanel {
     	}
     }
     
-    public void moveUp() {
+    private void moveUp() {
     	for (int i = 0; i<4; i++) {
 	    	for (Block block:blocks) {
 	    		if (block.getY() == i) {
@@ -211,7 +257,7 @@ public class GameBoard extends JPanel {
     	}
     }
     
-    public void moveDown() {
+    private void moveDown() {
     	for (int i = 3; i>=0; i--) {
 	    	for (Block block:blocks) {
 	    		if (block.getY() == i) {
@@ -221,13 +267,13 @@ public class GameBoard extends JPanel {
     	}
     }
     
-    public void postMovementSpecials() {
+    private void postMovementSpecials() {
     	for (Block block:blocks) {
     		block.special(blocks);
     	}
     }
     
-    public void removeNullBlocks() {
+    private void removeNullBlocks() {
     	
 		ArrayList<Block> newBlocks = new ArrayList<Block>();
     	for (Block block:blocks) {
@@ -256,6 +302,48 @@ public class GameBoard extends JPanel {
     	}
     	blocks = newBlocks;
     	
+    }
+    
+    private boolean checkWin() {
+    	for (Block block:blocks) {
+    		if (block.getValue() >= 2048) {
+    			return true;
+    		}
+    	}
+    	return false;
+    }
+    
+    private boolean checkLose() {
+    	boolean hasLost = true;
+    	for (Block block:blocks) {
+    		int counter = 0;
+    		int counter2 = 4;
+    		if (block.getX() == 0 || block.getX() == 3) {
+				counter2 -= 1;
+			}
+			if (block.getY() == 0 || block.getY() == 3) {
+				counter2 -= 1;
+			}
+    		for (Block surrounding:blocks) {
+    			if ((Math.abs(surrounding.getX()-block.getX()) == 0 && Math.abs(surrounding.getY()-block.getY()) == 1)||
+    				(Math.abs(surrounding.getX()-block.getX()) == 1 && Math.abs(surrounding.getY()-block.getY()) == 0)) {
+    				if (block.getValue() != 3 && block.getValue() != 5 && block.getValue() != 7) {
+    					if (surrounding.getValue() != block.getValue() && surrounding.getValue() != 3) {
+    						counter+=1;
+    					}
+    				}else {
+    					if (surrounding.getValue() != block.getValue()) {
+    						counter+=1;
+    					}
+    				}
+    			}
+    		}
+    		if (counter != counter2) {
+    			hasLost = false;
+    			break;
+    		}
+    	}
+    	return hasLost;
     }
     
     public void updateScore() {

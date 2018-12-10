@@ -1,8 +1,4 @@
-import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.font.FontRenderContext;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -14,7 +10,7 @@ public class IceBlock extends Block{
 	
 	private static BufferedImage img;
 	private boolean isToIce = false;
-	public static final String IMG_FILE = "ice.png";
+	private static final String IMG_FILE = "ice.png";
 	
 	public IceBlock(int x, int y) {
 		super(x, y, 7);

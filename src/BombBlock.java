@@ -1,8 +1,4 @@
-import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.font.FontRenderContext;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -13,7 +9,7 @@ import javax.imageio.ImageIO;
 public class BombBlock extends Block{
 	private boolean isToExplode = false;
 	private static BufferedImage img;
-	public static final String IMG_FILE = "tnt.png";
+	private static final String IMG_FILE = "tnt.png";
 	
 	public BombBlock(int x, int y) {
 		super(x, y, 5);

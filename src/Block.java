@@ -343,7 +343,7 @@ public abstract class Block {
 		}
 	}
 	
-	public boolean isWildcard(Block block) {
+	private boolean isWildcard(Block block) {
 		return block.getValue() == 3;
 	}
 	
