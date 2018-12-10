@@ -33,7 +33,9 @@ public abstract class Block {
 		colorMap.put(512, new Color(229,190,53));
 		colorMap.put(1024, new Color(237,197,63));
 		colorMap.put(2048, new Color(237,194,46));
-		colorMap.put(3, new Color(242,145,255)); //Wildcard
+		colorMap.put(3, new Color(242,145,255)); //WildCardBlock
+		colorMap.put(5, new Color(6,26,58)); //BombBlock
+		colorMap.put(7, new Color(153,243,255)); //IceBlock
 	}
 	
 	public Block(int x,int y, int value) {
@@ -178,12 +180,11 @@ public abstract class Block {
 		}
 		this.x = minPosition;
 		this.isNew = false;
-		combineLeft(blocks);
 	}
 	
 	public void combineLeft(ArrayList<Block> blocks) {
 		for (Block block:blocks) {
-			if (block.getX() == this.x-1 && block.getY() == this.y && (block.getValue() == this.value || isWildcard(this) || isWildcard(block)) && !block.isNew && !block.isToBeDestroyed && block != this) {
+			if (block.getX() == this.x-1 && block.getY() == this.y && (block.getValue() == this.value || isWildcard(this) || isWildcard(block)) && !block.isNew && !block.isToBeDestroyed) {
 				this.x-=1;
 				if (!isWildcard(this) && !isWildcard(block)) {
 					this.value*=2;
@@ -220,14 +221,12 @@ public abstract class Block {
 			}
 		}
 		this.x = minPosition;
-		this.isNew = false;
-		combineRight(blocks);
-		
+		this.isNew = false;		
 	}
 	
 	public void combineRight(ArrayList<Block> blocks) {
 		for (Block block:blocks) {
-			if (block.getX() == this.x+1 && block.getY() == this.y && (block.getValue() == this.value || isWildcard(this) || isWildcard(block)) && !block.isNew && !block.isToBeDestroyed && block != this) {
+			if (block.getX() == this.x+1 && block.getY() == this.y && (block.getValue() == this.value || isWildcard(this) || isWildcard(block)) && !block.isNew && !block.isToBeDestroyed) {
 				this.x+=1;
 				if (!isWildcard(this) && !isWildcard(block)) {
 					this.value*=2;
@@ -265,12 +264,11 @@ public abstract class Block {
 		}
 		this.y = minPosition;
 		this.isNew = false;
-		combineUp(blocks);
 	}
 	
 	public void combineUp(ArrayList<Block> blocks) {
 		for (Block block:blocks) {
-			if (block.getY() == this.y-1 && block.getX() == this.x && (block.getValue() == this.value || isWildcard(this) || isWildcard(block)) && !block.isNew && !block.isToBeDestroyed && block != this) {
+			if (block.getY() == this.y-1 && block.getX() == this.x && (block.getValue() == this.value || isWildcard(this) || isWildcard(block)) && !block.isNew && !block.isToBeDestroyed) {
 				this.y-=1;
 				if (!isWildcard(this) && !isWildcard(block)) {
 					this.value*=2;
@@ -308,12 +306,11 @@ public abstract class Block {
 		}
 		this.y = minPosition;
 		this.isNew = false;
-		combineDown(blocks);
 	}
 	
 	public void combineDown(ArrayList<Block> blocks) {
 		for (Block block:blocks) {
-			if (block.getY() == this.y+1 && block.getX() == this.x && (block.getValue() == this.value || isWildcard(this) || isWildcard(block)) && !block.isNew && !block.isToBeDestroyed && block != this) {
+			if (block.getY() == this.y+1 && block.getX() == this.x && (block.getValue() == this.value || isWildcard(this) || isWildcard(block)) && !block.isNew && !block.isToBeDestroyed) {
 				this.y+=1;
 				if (!isWildcard(this) && !isWildcard(block)) {
 					this.value*=2;
