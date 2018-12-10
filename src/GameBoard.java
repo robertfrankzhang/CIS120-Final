@@ -6,8 +6,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,6 +20,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -48,6 +53,8 @@ public class GameBoard extends JPanel {
     
     private boolean isGameOver = false;
 
+    private boolean isFirstTimePlaying = true;
+    
     public GameBoard(JLabel status, JPanel status_panel) {
         // creates border around the court area, JComponent method
         setBorder(BorderFactory.createLineBorder(Color.BLACK));
@@ -86,6 +93,16 @@ public class GameBoard extends JPanel {
 	            	removeNullBlocks();
             	}
             }
+            
+        });
+        
+        addMouseListener(new MouseAdapter() {
+        	public void mouseClicked(MouseEvent m) {
+        		if (isFirstTimePlaying) {
+        			isFirstTimePlaying = false;
+        		}
+        	}
+        	
         });
 
         this.status = status;
@@ -138,7 +155,6 @@ public class GameBoard extends JPanel {
      * (Re-)set the game to its initial state.
      */
     public void reset() {
-        
         status.setText("Score: 0");
         statusPanel.add(status);
         if (replay != null) {
@@ -170,165 +186,178 @@ public class GameBoard extends JPanel {
 
     @Override
     public void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        g.setColor(new Color(202,193,181));
-        g.fillRect(0, 0, COURT_WIDTH, COURT_HEIGHT);
-        g.setColor(new Color(185,173,161));
-        g.fillRect(0, 0, 10, COURT_HEIGHT);
-        g.fillRect((COURT_WIDTH-10)/4, 0, 10, COURT_HEIGHT);
-        g.fillRect((COURT_WIDTH-10)/2, 0, 10, COURT_HEIGHT);
-        g.fillRect((COURT_WIDTH-10)*3/4, 0, 10, COURT_HEIGHT);
-        g.fillRect(COURT_WIDTH-10, 0, 10, COURT_HEIGHT);
-        
-        g.fillRect(0, 0, COURT_WIDTH,10);
-        g.fillRect(0,(COURT_HEIGHT-10)/4, COURT_WIDTH,10);
-        g.fillRect(0,(COURT_HEIGHT-10)/2, COURT_WIDTH,10);
-        g.fillRect(0,(COURT_HEIGHT-10)*3/4, COURT_WIDTH,10);
-        g.fillRect(0,COURT_HEIGHT-10, COURT_WIDTH,10);
-        
-        boolean doneAnimating = true;
-        for (Block block:toBeDestroyedBlocks) {
-        	block.draw(g);
-        	if (block.getCX() != block.getX() || block.getCY() != block.getY()) {
-        		doneAnimating = false;
+    	BufferedImage img = null;
+    	if (isFirstTimePlaying) {
+    		try {
+                if (img == null) {
+                    img = ImageIO.read(new File("instructions.png"));
+                }
+            } catch (IOException e) {
+                System.out.println("Internal Error:" + e.getMessage());
+            }
+    		g.drawImage(img, 0, 0, COURT_WIDTH, COURT_HEIGHT, null);
+    		
+    	}else {
+	        super.paintComponent(g);
+	        g.setColor(new Color(202,193,181));
+	        g.fillRect(0, 0, COURT_WIDTH, COURT_HEIGHT);
+	        g.setColor(new Color(185,173,161));
+	        g.fillRect(0, 0, 10, COURT_HEIGHT);
+	        g.fillRect((COURT_WIDTH-10)/4, 0, 10, COURT_HEIGHT);
+	        g.fillRect((COURT_WIDTH-10)/2, 0, 10, COURT_HEIGHT);
+	        g.fillRect((COURT_WIDTH-10)*3/4, 0, 10, COURT_HEIGHT);
+	        g.fillRect(COURT_WIDTH-10, 0, 10, COURT_HEIGHT);
+	        
+	        g.fillRect(0, 0, COURT_WIDTH,10);
+	        g.fillRect(0,(COURT_HEIGHT-10)/4, COURT_WIDTH,10);
+	        g.fillRect(0,(COURT_HEIGHT-10)/2, COURT_WIDTH,10);
+	        g.fillRect(0,(COURT_HEIGHT-10)*3/4, COURT_WIDTH,10);
+	        g.fillRect(0,COURT_HEIGHT-10, COURT_WIDTH,10);
+	        
+	        boolean doneAnimating = true;
+	        for (Block block:toBeDestroyedBlocks) {
+	        	block.draw(g);
+	        	if (block.getCX() != block.getX() || block.getCY() != block.getY()) {
+	        		doneAnimating = false;
+		        }
 	        }
-        }
-        
-        for (Block block:blocks) {
-        	block.draw(g);
-        	if (block.getCX() != block.getX() || block.getCY() != block.getY()) {
-        		doneAnimating = false;
+	        
+	        for (Block block:blocks) {
+	        	block.draw(g);
+	        	if (block.getCX() != block.getX() || block.getCY() != block.getY()) {
+	        		doneAnimating = false;
+		        }
 	        }
-        }
-        
-        if (doneAnimating && isAnimating || blocks.size() == 0) {
-        	updateScore();
-        	isAnimating = false;
-        	toBeDestroyedBlocks.clear();
-        	generateBlock();
-        	
-        	boolean isWin = checkWin();
-        	boolean isLose = checkLose();
-        	if (isWin) {
-        		status.setText("You win with a score of "+String.valueOf(score)+"!");
-        	}else if (isLose) {
-        		status.setText("You lose with a score of "+String.valueOf(score));
-        	}
-        	isGameOver = isWin || isLose;
-        }
-        
-        if (isGameOver) {
-        	g.setColor(new Color(0,0,0,200));
-            g.fillRect(0, 0, COURT_WIDTH, COURT_HEIGHT);
-            
-          //Win/Lose title:
-            String s;
-            if (checkWin()) s = "You Win!"; else s = "You Lose!";
-            Font font  = new Font(Font.SANS_SERIF, Font.BOLD, 40);
-            g.setFont(font);
-            FontRenderContext frc = new FontRenderContext(null, true, true);
-            g.setColor(Color.WHITE);
-            Rectangle2D r2D = font.getStringBounds(s, frc);
-            int rWidth = (int) Math.round(r2D.getWidth());
-            g.drawString(s, (int)(GameBoard.COURT_WIDTH/2-rWidth/2), 50);
-            
-            Map<Integer,String> scores = new TreeMap<Integer,String>();
-            
-            //replay button
-            if (firstIteration) {
-	            statusPanel.remove(status);
-	            replay = new JButton("Replay");
-	            replay.addActionListener(new ActionListener() {
-	                public void actionPerformed(ActionEvent e) {
-	                    reset();
-	                }
-	            });
-
-	            statusPanel.add(replay);
-	            firstIteration = false;
+	        
+	        if (doneAnimating && isAnimating || blocks.size() == 0) {
+	        	updateScore();
+	        	isAnimating = false;
+	        	toBeDestroyedBlocks.clear();
+	        	generateBlock();
+	        	
+	        	boolean isWin = checkWin();
+	        	boolean isLose = checkLose();
+	        	if (isWin) {
+	        		status.setText("You win with a score of "+String.valueOf(score)+"!");
+	        	}else if (isLose) {
+	        		status.setText("You lose with a score of "+String.valueOf(score));
+	        	}
+	        	isGameOver = isWin || isLose;
+	        }
+	        
+	        if (isGameOver) {
+	        	g.setColor(new Color(0,0,0,200));
+	            g.fillRect(0, 0, COURT_WIDTH, COURT_HEIGHT);
 	            
-	            FileIO.writeFile(score);
+	          //Win/Lose title:
+	            String s;
+	            if (checkWin()) s = "You Win!"; else s = "You Lose!";
+	            Font font  = new Font(Font.SANS_SERIF, Font.BOLD, 40);
+	            g.setFont(font);
+	            FontRenderContext frc = new FontRenderContext(null, true, true);
+	            g.setColor(Color.WHITE);
+	            Rectangle2D r2D = font.getStringBounds(s, frc);
+	            int rWidth = (int) Math.round(r2D.getWidth());
+	            g.drawString(s, (int)(GameBoard.COURT_WIDTH/2-rWidth/2), 50);
 	            
-            }
-            try {
-				scores = FileIO.readFile();
-			} catch (IOException e1) {
-				
-			}
-            
-            //New Highscore
-            boolean isNewHighscore = true;
-            for (Map.Entry<Integer, String> entry : scores.entrySet()) {
-            	if (entry.getKey() > score) {
-            		isNewHighscore = false;
-            	}
-            }
-            
-            if (isNewHighscore) {
-            	String h = "New Highscore: "+String.valueOf(score);
-                Font font2  = new Font(Font.SANS_SERIF, Font.BOLD, 20);
-                g.setFont(font2);
-                FontRenderContext frc2 = new FontRenderContext(null, true, true);
-                g.setColor(Color.WHITE);
-                Rectangle2D r2D2 = font2.getStringBounds(h, frc2);
-                int rWidth2 = (int) Math.round(r2D2.getWidth());
-                g.drawString(h, (int)(GameBoard.COURT_WIDTH/2-rWidth2/2), 80);
-            }else {
-            	String h = "Your Score: "+String.valueOf(score);
-                Font font2  = new Font(Font.SANS_SERIF, Font.BOLD, 20);
-                g.setFont(font2);
-                FontRenderContext frc2 = new FontRenderContext(null, true, true);
-                g.setColor(Color.WHITE);
-                Rectangle2D r2D2 = font2.getStringBounds(h, frc2);
-                int rWidth2 = (int) Math.round(r2D2.getWidth());
-                g.drawString(h, (int)(GameBoard.COURT_WIDTH/2-rWidth2/2), 80);
-            }
-            
-            //Top 3 Scores
-            String t = "Top 3 Scores";
-            Font font3  = new Font(Font.SANS_SERIF, Font.BOLD, 20);
-            g.setFont(font3);
-            FontRenderContext frc3 = new FontRenderContext(null, true, true);
-            g.setColor(Color.WHITE);
-            Rectangle2D r2D3 = font3.getStringBounds(t, frc3);
-            int rWidth3 = (int) Math.round(r2D3.getWidth());
-            g.drawString(t, (int)(GameBoard.COURT_WIDTH/2-rWidth3/2), 130);
-            
-            int scoreCounter = 0;
-            
-            Set<Integer> sortedScoreKeys = new TreeSet<Integer>(scores.keySet());
-            ArrayList<Integer> top3 = new ArrayList<Integer>();
-            for (Integer score : sortedScoreKeys) {
-            	top3.add(score);
-            }
-            
-            Collections.reverse(top3);
-            
-            for (Integer score : top3) {
-            	
-            	if (scoreCounter < 3) {
-            		String timestamp = FileIO.parseTimestamp(scores.get(score));
-            		//Score
-            		 Font font4  = new Font(Font.SANS_SERIF, Font.BOLD, 15);
-                     g.setFont(font4);
-                     g.setColor(Color.WHITE);
-                     g.drawString(String.valueOf(score), 20, 150+20*scoreCounter);
-            		
-                     //Timestamp
-                     Font font5  = new Font(Font.SANS_SERIF, Font.BOLD, 15);
-                     g.setFont(font5);
-                     g.setColor(Color.WHITE);
-                     FontRenderContext frc5 = new FontRenderContext(null, true, true);
-                     Rectangle2D r2D5 = font5.getStringBounds(timestamp, frc5);
-                     int rWidth5 = (int) Math.round(r2D5.getWidth());
-                     g.drawString(timestamp, GameBoard.COURT_WIDTH-20-rWidth5, 150+20*scoreCounter);
-                     
-            		scoreCounter+=1;
-            	}else {
-            		break;
-            	}
-            }
-        }
+	            Map<Integer,String> scores = new TreeMap<Integer,String>();
+	            
+	            //replay button
+	            if (firstIteration) {
+		            statusPanel.remove(status);
+		            replay = new JButton("Replay");
+		            replay.addActionListener(new ActionListener() {
+		                public void actionPerformed(ActionEvent e) {
+		                    reset();
+		                }
+		            });
+	
+		            statusPanel.add(replay);
+		            firstIteration = false;
+		            
+		            FileIO.writeFile(score);
+		            
+	            }
+	            try {
+					scores = FileIO.readFile();
+				} catch (IOException e1) {
+					
+				}
+	            
+	            //New Highscore
+	            boolean isNewHighscore = true;
+	            for (Map.Entry<Integer, String> entry : scores.entrySet()) {
+	            	if (entry.getKey() > score) {
+	            		isNewHighscore = false;
+	            	}
+	            }
+	            
+	            if (isNewHighscore) {
+	            	String h = "New Highscore: "+String.valueOf(score);
+	                Font font2  = new Font(Font.SANS_SERIF, Font.BOLD, 20);
+	                g.setFont(font2);
+	                FontRenderContext frc2 = new FontRenderContext(null, true, true);
+	                g.setColor(Color.WHITE);
+	                Rectangle2D r2D2 = font2.getStringBounds(h, frc2);
+	                int rWidth2 = (int) Math.round(r2D2.getWidth());
+	                g.drawString(h, (int)(GameBoard.COURT_WIDTH/2-rWidth2/2), 80);
+	            }else {
+	            	String h = "Your Score: "+String.valueOf(score);
+	                Font font2  = new Font(Font.SANS_SERIF, Font.BOLD, 20);
+	                g.setFont(font2);
+	                FontRenderContext frc2 = new FontRenderContext(null, true, true);
+	                g.setColor(Color.WHITE);
+	                Rectangle2D r2D2 = font2.getStringBounds(h, frc2);
+	                int rWidth2 = (int) Math.round(r2D2.getWidth());
+	                g.drawString(h, (int)(GameBoard.COURT_WIDTH/2-rWidth2/2), 80);
+	            }
+	            
+	            //Top 3 Scores
+	            String t = "Top 3 Scores";
+	            Font font3  = new Font(Font.SANS_SERIF, Font.BOLD, 20);
+	            g.setFont(font3);
+	            FontRenderContext frc3 = new FontRenderContext(null, true, true);
+	            g.setColor(Color.WHITE);
+	            Rectangle2D r2D3 = font3.getStringBounds(t, frc3);
+	            int rWidth3 = (int) Math.round(r2D3.getWidth());
+	            g.drawString(t, (int)(GameBoard.COURT_WIDTH/2-rWidth3/2), 130);
+	            
+	            int scoreCounter = 0;
+	            
+	            Set<Integer> sortedScoreKeys = new TreeSet<Integer>(scores.keySet());
+	            ArrayList<Integer> top3 = new ArrayList<Integer>();
+	            for (Integer score : sortedScoreKeys) {
+	            	top3.add(score);
+	            }
+	            
+	            Collections.reverse(top3);
+	            
+	            for (Integer score : top3) {
+	            	
+	            	if (scoreCounter < 3) {
+	            		String timestamp = FileIO.parseTimestamp(scores.get(score));
+	            		//Score
+	            		 Font font4  = new Font(Font.SANS_SERIF, Font.BOLD, 15);
+	                     g.setFont(font4);
+	                     g.setColor(Color.WHITE);
+	                     g.drawString(String.valueOf(score), 20, 150+20*scoreCounter);
+	            		
+	                     //Timestamp
+	                     Font font5  = new Font(Font.SANS_SERIF, Font.BOLD, 15);
+	                     g.setFont(font5);
+	                     g.setColor(Color.WHITE);
+	                     FontRenderContext frc5 = new FontRenderContext(null, true, true);
+	                     Rectangle2D r2D5 = font5.getStringBounds(timestamp, frc5);
+	                     int rWidth5 = (int) Math.round(r2D5.getWidth());
+	                     g.drawString(timestamp, GameBoard.COURT_WIDTH-20-rWidth5, 150+20*scoreCounter);
+	                     
+	            		scoreCounter+=1;
+	            	}else {
+	            		break;
+	            	}
+	            }
+	        }
+    	}
     }
     
     private void moveLeft() {
