@@ -9,7 +9,7 @@ import javax.imageio.ImageIO;
 
 public class WildCardBlock extends Block{
 	private static BufferedImage img;
-	private static final String IMG_FILE = "wildcard.png";
+	private static final String IMG_FILE = "files/wildcard.png";
 	
 	public WildCardBlock(int x, int y) {
 		super(x, y, 3);

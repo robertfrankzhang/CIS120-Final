@@ -190,7 +190,7 @@ public class GameBoard extends JPanel {
     	if (isFirstTimePlaying) {
     		try {
                 if (img == null) {
-                    img = ImageIO.read(new File("instructions.png"));
+                    img = ImageIO.read(new File("files/instructions.png"));
                 }
             } catch (IOException e) {
                 System.out.println("Internal Error:" + e.getMessage());

@@ -10,7 +10,7 @@ public class IceBlock extends Block{
 	
 	private static BufferedImage img;
 	private boolean isToIce = false;
-	private static final String IMG_FILE = "ice.png";
+	private static final String IMG_FILE = "files/ice.png";
 	
 	public IceBlock(int x, int y) {
 		super(x, y, 7);

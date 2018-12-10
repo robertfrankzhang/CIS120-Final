@@ -9,7 +9,7 @@ import javax.imageio.ImageIO;
 public class BombBlock extends Block{
 	private boolean isToExplode = false;
 	private static BufferedImage img;
-	private static final String IMG_FILE = "tnt.png";
+	private static final String IMG_FILE = "files/tnt.png";
 	
 	public BombBlock(int x, int y) {
 		super(x, y, 5);
