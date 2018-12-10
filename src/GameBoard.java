@@ -100,11 +100,10 @@ public class GameBoard extends JPanel {
     	double blockDecider = Math.random();
     	
     	if (blockDecider<0.1) value = 4;
-    	else if (blockDecider<0.95) value = 2;
-    	else if (blockDecider<0.97) value = 3;
+    	else if (blockDecider<0.93) value = 2;
+    	else if (blockDecider<0.96) value = 3;
     	else if (blockDecider<0.98) value = 5;
     	else value = 7;
-    	
     	
     	Block b;
     	if (value == 3) {
