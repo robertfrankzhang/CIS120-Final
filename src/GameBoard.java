@@ -100,15 +100,19 @@ public class GameBoard extends JPanel {
     	double blockDecider = Math.random();
     	
     	if (blockDecider<0.1) value = 4;
-    	else if (blockDecider<0.8) value = 2;
-    	else if (blockDecider<0.85) value = 3;
-    	else value = 5;
+    	else if (blockDecider<0.95) value = 2;
+    	else if (blockDecider<0.97) value = 3;
+    	else if (blockDecider<0.98) value = 5;
+    	else value = 7;
+    	
     	
     	Block b;
     	if (value == 3) {
     		b = new WildCardBlock(x,y);
     	}else if (value == 5) {
     		b = new BombBlock(x,y);
+    	}else if (value == 7) {
+    		b = new IceBlock(x,y);
     	}
     	else {
     		b = new RegularBlock(x,y,value);
@@ -234,6 +238,8 @@ public class GameBoard extends JPanel {
     				destroyedBlock = new WildCardBlock(block.getX(),block.getY());
     			}else if (block.getValue() == 5) {
     				destroyedBlock = new BombBlock(block.getX(),block.getY());
+    			}else if (block.getValue() == 7) {
+    				destroyedBlock = new IceBlock(block.getX(),block.getY());
     			}
     			else {
     				destroyedBlock = new RegularBlock(block.getX(),block.getY(),block.getValue());

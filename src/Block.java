@@ -33,9 +33,6 @@ public abstract class Block {
 		colorMap.put(512, new Color(229,190,53));
 		colorMap.put(1024, new Color(237,197,63));
 		colorMap.put(2048, new Color(237,194,46));
-		colorMap.put(3, new Color(242,145,255)); //WildCardBlock
-		colorMap.put(5, new Color(6,26,58)); //BombBlock
-		colorMap.put(7, new Color(153,243,255)); //IceBlock
 	}
 	
 	public static Color getColorMap(Integer i) {
@@ -144,13 +141,8 @@ public abstract class Block {
         g.fillRect((int)(this.cx*(double)(GameBoard.COURT_WIDTH-10)/4+10+(width*(1/scalingFactor)-width)/2), (int)(this.cy*(double)(GameBoard.COURT_HEIGHT-10)/4+10+(height*(1/scalingFactor)-height)/2), width, height);
         g.setColor(Color.BLACK);
         
-        String s;
-    	if (value == 3) {
-    		s = "W";
-    	}else {
-    		s = String.valueOf(this.value);
-    	}
-        
+        String s = String.valueOf(this.value);
+    	
         Font font  = new Font(Font.SANS_SERIF, Font.BOLD, 40);
         g.setFont(font);
         
@@ -196,9 +188,9 @@ public abstract class Block {
 	
 	public void combineLeft(ArrayList<Block> blocks) {
 		for (Block block:blocks) {
-			if (block.getX() == this.x-1 && block.getY() == this.y && (block.getValue() == this.value || isWildcard(this) || isWildcard(block)) && !block.isNew && !block.isToBeDestroyed) {
+			if (block.getX() == this.x-1 && block.getY() == this.y && (block.getValue() == this.value || isWildcard(this) || isWildcard(block)) && !block.isNew && !block.isToBeDestroyed && block.getValue() != 5 && block.getValue() != 7) {
 				this.x-=1;
-				if (!isWildcard(this) && !isWildcard(block) && block.getValue() != 5) {
+				if (!isWildcard(this) && !isWildcard(block)) {
 					this.value*=2;
 					block.setToBeDestroyed(true);
 					this.isNew = true;
@@ -208,13 +200,13 @@ public abstract class Block {
 					block.setToBeDestroyed(true);
 					this.setToBeDestroyed(true);
 				}
-				else if (isWildcard(this) && block.getValue() != 5) {
+				else if (isWildcard(this)) {
 					this.value = block.getValue()*2;
 					block.setToBeDestroyed(true);
 					this.isNew = true;
 					GameBoard.boardSingleton.score+=this.value;
 				}
-				else if (isWildcard(block) && block.getValue() != 5) {
+				else if (isWildcard(block)) {
 					this.value*=2;
 					block.setToBeDestroyed(true);
 					this.isNew = true;
@@ -238,9 +230,9 @@ public abstract class Block {
 	
 	public void combineRight(ArrayList<Block> blocks) {
 		for (Block block:blocks) {
-			if (block.getX() == this.x+1 && block.getY() == this.y && (block.getValue() == this.value || isWildcard(this) || isWildcard(block)) && !block.isNew && !block.isToBeDestroyed) {
+			if (block.getX() == this.x+1 && block.getY() == this.y && (block.getValue() == this.value || isWildcard(this) || isWildcard(block)) && !block.isNew && !block.isToBeDestroyed  && block.getValue() != 5 && block.getValue() != 7) {
 				this.x+=1;
-				if (!isWildcard(this) && !isWildcard(block) && block.getValue() != 5) {
+				if (!isWildcard(this) && !isWildcard(block)) {
 					this.value*=2;
 					block.setToBeDestroyed(true);
 					this.isNew = true;
@@ -250,13 +242,13 @@ public abstract class Block {
 					block.setToBeDestroyed(true);
 					this.setToBeDestroyed(true);
 				}
-				else if (isWildcard(this) && block.getValue() != 5) {
+				else if (isWildcard(this)) {
 					this.value = block.getValue()*2;
 					block.setToBeDestroyed(true);
 					this.isNew = true;
 					GameBoard.boardSingleton.score+=this.value;
 				}
-				else if (isWildcard(block) && block.getValue() != 5) {
+				else if (isWildcard(block)) {
 					this.value*=2;
 					block.setToBeDestroyed(true);
 					this.isNew = true;
@@ -280,9 +272,9 @@ public abstract class Block {
 	
 	public void combineUp(ArrayList<Block> blocks) {
 		for (Block block:blocks) {
-			if (block.getY() == this.y-1 && block.getX() == this.x && (block.getValue() == this.value || isWildcard(this) || isWildcard(block)) && !block.isNew && !block.isToBeDestroyed) {
+			if (block.getY() == this.y-1 && block.getX() == this.x && (block.getValue() == this.value || isWildcard(this) || isWildcard(block)) && !block.isNew && !block.isToBeDestroyed && block.getValue() != 5 && block.getValue() != 7) {
 				this.y-=1;
-				if (!isWildcard(this) && !isWildcard(block) && block.getValue() != 5) {
+				if (!isWildcard(this) && !isWildcard(block)) {
 					this.value*=2;
 					block.setToBeDestroyed(true);
 					this.isNew = true;
@@ -292,13 +284,13 @@ public abstract class Block {
 					block.setToBeDestroyed(true);
 					this.setToBeDestroyed(true);
 				}
-				else if (isWildcard(this) && block.getValue() != 5) {
+				else if (isWildcard(this)) {
 					this.value = block.getValue()*2;
 					block.setToBeDestroyed(true);
 					this.isNew = true;
 					GameBoard.boardSingleton.score+=this.value;
 				}
-				else if (isWildcard(block) && block.getValue() != 5) {
+				else if (isWildcard(block)) {
 					this.value*=2;
 					block.setToBeDestroyed(true);
 					this.isNew = true;
@@ -322,9 +314,9 @@ public abstract class Block {
 	
 	public void combineDown(ArrayList<Block> blocks) {
 		for (Block block:blocks) {
-			if (block.getY() == this.y+1 && block.getX() == this.x && (block.getValue() == this.value || isWildcard(this) || isWildcard(block)) && !block.isNew && !block.isToBeDestroyed) {
+			if (block.getY() == this.y+1 && block.getX() == this.x && (block.getValue() == this.value || isWildcard(this) || isWildcard(block)) && !block.isNew && !block.isToBeDestroyed && block.getValue() != 5 && block.getValue() != 7) {
 				this.y+=1;
-				if (!isWildcard(this) && !isWildcard(block) && block.getValue() != 5) {
+				if (!isWildcard(this) && !isWildcard(block)) {
 					this.value*=2;
 					block.setToBeDestroyed(true);
 					this.isNew = true;
@@ -334,13 +326,13 @@ public abstract class Block {
 					block.setToBeDestroyed(true);
 					this.setToBeDestroyed(true);
 				}
-				else if (isWildcard(this) && block.getValue() != 5) {
+				else if (isWildcard(this)) {
 					this.value = block.getValue()*2;
 					block.setToBeDestroyed(true);
 					this.isNew = true;
 					GameBoard.boardSingleton.score+=this.value;
 				}
-				else if (isWildcard(block) && block.getValue() != 5) {
+				else if (isWildcard(block)) {
 					this.value*=2;
 					block.setToBeDestroyed(true);
 					this.isNew = true;

@@ -3,13 +3,27 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
 
 public class BombBlock extends Block{
 	private boolean isToExplode = false;
+	private static BufferedImage img;
+	public static final String IMG_FILE = "tnt.png";
 	
 	public BombBlock(int x, int y) {
 		super(x, y, 5);
+		try {
+            if (img == null) {
+                img = ImageIO.read(new File(IMG_FILE));
+            }
+        } catch (IOException e) {
+            System.out.println("Internal Error:" + e.getMessage());
+        }
 	}
 	
 	@Override
@@ -25,7 +39,6 @@ public class BombBlock extends Block{
 				super.setX(super.getX()-1);
 				block.setToBeDestroyed(true);
 				isToExplode = true;
-				special(blocks);
 				break;
 			}
 		}
@@ -44,7 +57,6 @@ public class BombBlock extends Block{
 				super.setX(super.getX()+1);
 				block.setToBeDestroyed(true);
 				isToExplode = true;
-				special(blocks);
 				break;
 			}
 		}
@@ -63,7 +75,6 @@ public class BombBlock extends Block{
 				super.setY(super.getY()-1);
 				block.setToBeDestroyed(true);
 				isToExplode = true;
-				special(blocks);
 				break;
 			}
 		}
@@ -82,7 +93,6 @@ public class BombBlock extends Block{
 				super.setY(super.getY()+1);
 				block.setToBeDestroyed(true);
 				isToExplode = true;
-				special(blocks);
 				break;
 			}
 		}
@@ -104,26 +114,9 @@ public class BombBlock extends Block{
 	
 	@Override
 	public void draw(Graphics g) {
-		g.setColor(Block.getColorMap(super.getValue()));
 		int width = (int)(super.getScalingFactor()*(GameBoard.COURT_WIDTH-50)/4);
 		int height = (int)(super.getScalingFactor()*(GameBoard.COURT_HEIGHT-50)/4);
-        g.fillRect((int)(this.getCX()*(double)(GameBoard.COURT_WIDTH-10)/4+10+(width*(1/super.getScalingFactor())-width)/2), (int)(this.getCY()*(double)(GameBoard.COURT_HEIGHT-10)/4+10+(height*(1/super.getScalingFactor())-height)/2), width, height);
-        g.setColor(Color.WHITE);
-        
-        String s = "Bomb";
-        
-        Font font  = new Font(Font.SANS_SERIF, Font.BOLD, 25);
-        g.setFont(font);
-        
-        FontRenderContext frc = new FontRenderContext(null, true, true);
-
-        Rectangle2D r2D = font.getStringBounds(s, frc);
-        int rWidth = (int) Math.round(r2D.getWidth());
-        int rHeight = (int) Math.round(r2D.getHeight());
-        
-        if (super.getScalingFactor() == 1) {
-        	g.drawString(s, (int)(this.getCX()*(double)(GameBoard.COURT_WIDTH-10)/4+10+(GameBoard.COURT_WIDTH-50)/8-rWidth/2), (int)(this.getCY()*(double)(GameBoard.COURT_HEIGHT-10)/4+10+(GameBoard.COURT_HEIGHT-50)/8+rHeight/4));
-        }
+        g.drawImage(img,(int)(this.getCX()*(double)(GameBoard.COURT_WIDTH-10)/4+10+(width*(1/super.getScalingFactor())-width)/2), (int)(this.getCY()*(double)(GameBoard.COURT_HEIGHT-10)/4+10+(height*(1/super.getScalingFactor())-height)/2), width, height,null);
         
         if (Math.abs(super.getCX()-super.getX()) > 0.01 || Math.abs(super.getCY()-super.getY()) > 0.01) {
         	super.setCX(super.getCX()+(double)(super.getX()-super.getOX())/super.getFramesToAnimate());
